@@ -19,7 +19,7 @@ class PostModelTest(TestCase):
         )
 
     def test_verbose_name(self):
-        post = PostModelTest.post
+        post = self.post
         field_verbose = {
             'text': const.POST_VERBOSE_TEXT,
             'pub_date': const.POST_VERBOSE_PUB_DATE,
@@ -32,7 +32,7 @@ class PostModelTest(TestCase):
                                  expected)
 
     def test_help_text(self):
-        post = PostModelTest.post
+        post = self.post
         field_help_text = {
             'text': const.POST_HELP_TEXT,
             'group': const.POST_HELP_GROUP,
@@ -43,10 +43,10 @@ class PostModelTest(TestCase):
                                  expected)
 
     def test_str(self):
-        post = PostModelTest.post
+        post = self.post
         value = post.__str__()
-        expected = f'Author: , Post: {const.POST_TEXT}, ' \
-                   f'Pub date: {datetime.now().date()}'
+        expected = (f'Author: , Post: {const.POST_TEXT}, '
+                    f'Pub date: {datetime.now().date()}')
         self.assertEqual(value, expected)
 
 
@@ -61,7 +61,7 @@ class GroupModelTest(TestCase):
         )
 
     def test_verbose_name(self):
-        group = GroupModelTest.group
+        group = self.group
         field_verbose = {
             'title': const.GROUP_VERBOSE_TITLE,
             'slug': const.GROUP_VERBOSE_SLUG,
@@ -73,7 +73,7 @@ class GroupModelTest(TestCase):
                                  expected)
 
     def test_help_text(self):
-        group = GroupModelTest.group
+        group = self.group
         field_help_text = {
             'title': const.GROUP_HELP_TITLE,
             'slug': const.GROUP_HELP_SLUG,
@@ -85,7 +85,7 @@ class GroupModelTest(TestCase):
                                  expected)
 
     def test_str(self):
-        group = GroupModelTest.group
+        group = self.group
         value = group.__str__()
         expected = const.GROUP_TITLE
         self.assertEqual(value, expected)

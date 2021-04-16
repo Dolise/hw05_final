@@ -2,12 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .forms import PostForm, CommentForm
+from posts.forms import PostForm, CommentForm
 from django.urls import reverse
 
 from yatube.settings import PAGINATOR_PER_PAGE
 
-from .models import Post, Group, User, Comment, Follow
+from posts.models import Post, Group, User, Comment, Follow
 
 
 def index(request):
@@ -26,13 +26,19 @@ def group_posts(request, slug):
     paginator = Paginator(posts_list, PAGINATOR_PER_PAGE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request, 'group.html', {'group': group, 'page': page})
+    return render(request, 'group.html', {'group': group,
+                                          'page': page,
+                                          })
 
 
 @login_required(login_url='/auth/login/')
 def new_post(request):
     """Return rendered page for adding new post and add post to DB."""
     form = PostForm(request.POST or None, files=request.FILES or None)
+    context = {
+        'form': form,
+        'url': '/new/',
+    }
     if request.method == 'POST':
         if form.is_valid():
             text = form.cleaned_data['text']
@@ -42,12 +48,8 @@ def new_post(request):
             post = Post(author=author, group=group, text=text, image=image)
             post.save()
             return redirect('index')
-        return render(request, 'new_post.html', {'form': form,
-                                                 'url': '/new/',
-                                                 })
-    return render(request, 'new_post.html', {'form': form,
-                                             'url': '/new/',
-                                             })
+        return render(request, 'new_post.html', context)
+    return render(request, 'new_post.html', context)
 
 
 def profile(request, username):
@@ -60,8 +62,6 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
-    follows = Follow.objects.filter(user=author).count()
-    followers = Follow.objects.filter(author=author).count()
     following = False
     if request.user.is_authenticated:
         if Follow.objects.filter(user=request.user, author=author).exists():
@@ -72,8 +72,6 @@ def profile(request, username):
                    'author': author,
                    'posts_list': posts_list,
                    'following': following,
-                   'follows': follows,
-                   'followers': followers,
                    })
 
 
@@ -86,8 +84,6 @@ def post_view(request, username, post_id):
     post = Post.objects.get(id=post_id)
     comments = Comment.objects.filter(post=post)
     comment_form = CommentForm()
-    follows = Follow.objects.filter(user=author).count()
-    followers = Follow.objects.filter(author=author).count()
     following = False
     if request.user.is_authenticated:
         if Follow.objects.filter(user=request.user, author=author).exists():
@@ -97,8 +93,6 @@ def post_view(request, username, post_id):
                                          'form': comment_form,
                                          'comments': comments,
                                          'following': following,
-                                         'follows': follows,
-                                         'followers': followers,
                                          })
 
 

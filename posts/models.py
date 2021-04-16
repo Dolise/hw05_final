@@ -19,10 +19,15 @@ class Post(models.Model):
     """
     text = models.TextField('Текст', help_text='Введите текст')
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True,)
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               related_name='posts', verbose_name='Автор')
-    group = models.ForeignKey('Group', on_delete=models.SET_NULL,
-                              blank=True, null=True, verbose_name='Группа',
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               related_name='posts',
+                               verbose_name='Автор')
+    group = models.ForeignKey('Group',
+                              on_delete=models.SET_NULL,
+                              blank=True,
+                              null=True,
+                              verbose_name='Группа',
                               help_text='Выберите группу')
     image = models.ImageField(upload_to='posts/', blank=True, null=True)
 
@@ -31,7 +36,6 @@ class Post(models.Model):
         text = textwrap.wrap(self.text, width=30)[0]
         pub_date = self.pub_date
         return f'Author: {author}, Post: {text}, Pub date: {pub_date.date()}'
-        # Пытался переносить строки через \n, но видимо так не работает
 
     class Meta:
         db_table = 'Posts'
@@ -48,9 +52,12 @@ class Group(models.Model):
     slug - link to group
     description - something about group
     """
-    title = models.CharField('Заголовок', max_length=200,
+    title = models.CharField('Заголовок',
+                             max_length=200,
                              help_text='Введите название группы')
-    slug = models.SlugField('Ссылка', max_length=10, unique=True,
+    slug = models.SlugField('Ссылка',
+                            max_length=10,
+                            unique=True,
                             help_text='Придумайте ссылку')
     description = models.TextField('Описание',
                                    help_text='Введите описание группы')
@@ -76,17 +83,27 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         related_name='comments',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Пост'
+
     )
     author = models.ForeignKey(
         User,
         related_name='comments',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Автор'
     )
-    text = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
+    text = models.TextField(verbose_name='Текст')
+    created = models.DateTimeField(auto_now_add=True,
+                                   verbose_name='Дата создания')
+
+    def __str__(self):
+        text = textwrap.wrap(self.text, width=30)[0]
+        author = self.author
+        return f'Автор: {author}, Текст: {text}'
 
     class Meta:
+        db_table = 'Comments'
         ordering = ('-created', )
 
 
@@ -101,9 +118,17 @@ class Follow(models.Model):
     """
     user = models.ForeignKey(User,
                              related_name='follower',
-                             on_delete=models.CASCADE
+                             on_delete=models.CASCADE,
+                             verbose_name='Пользователь'
                              )
     author = models.ForeignKey(User,
                                related_name='following',
-                               on_delete=models.CASCADE
+                               on_delete=models.CASCADE,
+                               verbose_name='Автор'
                                )
+
+    def __str__(self):
+        return f'{self.user} подписался на {self.author}'
+
+    class Meta:
+        db_table = 'Follow'
